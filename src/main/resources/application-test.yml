@@ -1,0 +1,4 @@
+logging:
+  level:
+    com.opendatajungle: DEBUG
+    org.springframework.security: DEBUG
