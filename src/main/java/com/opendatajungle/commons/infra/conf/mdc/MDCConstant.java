@@ -8,6 +8,7 @@ public class MDCConstant {
     public static final String TRANSACTION_USER = "transaction.user";
     public static final String TRANSACTION_STATUS = "transaction.status";
     public static final String TRANSACTION_DURATION = "transaction.duration";
+
     private MDCConstant() {
     }
 }

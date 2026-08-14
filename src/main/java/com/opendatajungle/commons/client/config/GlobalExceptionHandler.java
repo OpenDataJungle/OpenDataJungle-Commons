@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.opendatajungle.commons.business.exception.NotFoundException;
 import com.opendatajungle.commons.business.exception.ParamException;
 import com.opendatajungle.commons.client.dto.GeneralResponseException;
-import com.opendatajungle.commons.client.exception.UnsupportedFileExtensionException;
-import com.opendatajungle.commons.client.exception.UnsupportedSourceTypeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -189,32 +187,6 @@ public class GlobalExceptionHandler {
                 null
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    @ExceptionHandler(UnsupportedSourceTypeException.class)
-    public ResponseEntity<GeneralResponseException> handleUnsupportedSourceTypeException(UnsupportedSourceTypeException ex, HttpServletRequest request) {
-        logger.warn("UnsupportedSourceTypeException: path={}, message={}", request.getRequestURI(), ex.getMessage());
-        GeneralResponseException response = new GeneralResponseException(
-                "UNSUPPORTED_SOURCE_TYPE",
-                ex.getMessage(),
-                buildPath(request),
-                null,
-                null
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    @ExceptionHandler(UnsupportedFileExtensionException.class)
-    public ResponseEntity<GeneralResponseException> handleUnsupportedFileExtensionException(UnsupportedFileExtensionException ex, HttpServletRequest request) {
-        logger.warn("UnsupportedFileExtensionException: path={}, message={}", request.getRequestURI(), ex.getMessage());
-        GeneralResponseException response = new GeneralResponseException(
-                "UNSUPPORTED_FILE_EXTENSION",
-                ex.getMessage(),
-                buildPath(request),
-                null,
-                null
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(Exception.class)

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.opendatajungle.commons.business.exception.NotFoundException;
 import com.opendatajungle.commons.business.exception.ParamException;
 import com.opendatajungle.commons.client.dto.GeneralResponseException;
-import com.opendatajungle.commons.client.exception.UnsupportedFileExtensionException;
-import com.opendatajungle.commons.client.exception.UnsupportedSourceTypeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -49,6 +47,14 @@ class GlobalExceptionHandlerTest {
 
     private GlobalExceptionHandler handler;
 
+    private static MethodParameter dummyMethodParameter() throws NoSuchMethodException {
+        return new MethodParameter(GlobalExceptionHandlerTest.class.getDeclaredMethod("dummyTarget", String.class), 0);
+    }
+
+    private static void dummyTarget(String value) {
+        // used only via reflection to build a MethodParameter for tests
+    }
+
     @BeforeEach
     void setUp() {
         handler = new GlobalExceptionHandler();
@@ -69,9 +75,7 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().code()).isEqualTo("INVALID_FORMAT");
         assertThat(response.getBody().field()).isEqualTo("size");
         assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
-        assertThat(response.getBody().information())
-                .containsEntry("invalid_value", "abc")
-                .containsEntry("expected_type", "Integer");
+        assertThat(response.getBody().information()).containsEntry("invalid_value", "abc").containsEntry("expected_type", "Integer");
     }
 
     @Test
@@ -92,8 +96,7 @@ class GlobalExceptionHandlerTest {
         // Given
         InvalidFormatException cause = new InvalidFormatException("not a number", "abc", Integer.class);
         cause.prependPath(new Object(), "size");
-        org.springframework.http.converter.HttpMessageNotReadableException ex =
-                new org.springframework.http.converter.HttpMessageNotReadableException("unreadable", cause, null);
+        org.springframework.http.converter.HttpMessageNotReadableException ex = new org.springframework.http.converter.HttpMessageNotReadableException("unreadable", cause, null);
 
         // When
         ResponseEntity<GeneralResponseException> response = handler.handleHttpMessageNotReadableException(ex, request);
@@ -108,8 +111,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleHttpMessageNotReadableException_shouldReturnGenericMessage_whenCauseIsNotInvalidFormatException() {
         // Given
-        org.springframework.http.converter.HttpMessageNotReadableException ex =
-                new org.springframework.http.converter.HttpMessageNotReadableException("malformed json", new RuntimeException("boom"), null);
+        org.springframework.http.converter.HttpMessageNotReadableException ex = new org.springframework.http.converter.HttpMessageNotReadableException("malformed json", new RuntimeException("boom"), null);
 
         // When
         ResponseEntity<GeneralResponseException> response = handler.handleHttpMessageNotReadableException(ex, request);
@@ -202,8 +204,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleMethodArgumentTypeMismatchException_shouldExposeParameterName() {
         // Given
-        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException(
-                "not-a-uuid", UUID.class, "id", mock(MethodParameter.class), new IllegalArgumentException());
+        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException("not-a-uuid", UUID.class, "id", mock(MethodParameter.class), new IllegalArgumentException());
 
         // When
         ResponseEntity<GeneralResponseException> response = handler.handleMethodArgumentTypeMismatchException(ex, request);
@@ -218,8 +219,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleHttpMediaTypeNotSupportedException_shouldReturnUnsupportedMediaType() {
         // Given
-        HttpMediaTypeNotSupportedException ex =
-                new HttpMediaTypeNotSupportedException(MediaType.APPLICATION_XML, List.of(MediaType.APPLICATION_JSON));
+        HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(MediaType.APPLICATION_XML, List.of(MediaType.APPLICATION_JSON));
 
         // When
         ResponseEntity<GeneralResponseException> response = handler.handleHttpMediaTypeNotSupportedException(ex, request);
@@ -305,34 +305,6 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void handleUnsupportedSourceTypeException_shouldReturnBadRequest() {
-        // Given
-        UnsupportedSourceTypeException ex = new UnsupportedSourceTypeException("XML");
-
-        // When
-        ResponseEntity<GeneralResponseException> response = handler.handleUnsupportedSourceTypeException(ex, request);
-
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody().code()).isEqualTo("UNSUPPORTED_SOURCE_TYPE");
-        assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
-    }
-
-    @Test
-    void handleUnsupportedFileExtensionException_shouldReturnBadRequest() {
-        // Given
-        UnsupportedFileExtensionException ex = new UnsupportedFileExtensionException("exe");
-
-        // When
-        ResponseEntity<GeneralResponseException> response = handler.handleUnsupportedFileExtensionException(ex, request);
-
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody().code()).isEqualTo("UNSUPPORTED_FILE_EXTENSION");
-        assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
-    }
-
-    @Test
     void handleGenericException_shouldReturnInternalServerError() {
         // Given
         Exception ex = new Exception("unexpected");
@@ -358,13 +330,5 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody().code()).isEqualTo("NOT_FOUND");
         assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
-    }
-
-    private static MethodParameter dummyMethodParameter() throws NoSuchMethodException {
-        return new MethodParameter(GlobalExceptionHandlerTest.class.getDeclaredMethod("dummyTarget", String.class), 0);
-    }
-
-    private static void dummyTarget(String value) {
-        // used only via reflection to build a MethodParameter for tests
     }
 }
