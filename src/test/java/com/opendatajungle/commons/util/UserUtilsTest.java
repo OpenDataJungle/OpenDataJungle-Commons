@@ -1,4 +1,4 @@
-package com.opendatajungle.commons.shared.util;
+package com.opendatajungle.commons.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;

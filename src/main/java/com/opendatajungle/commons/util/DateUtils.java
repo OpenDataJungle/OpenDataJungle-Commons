@@ -1,4 +1,4 @@
-package com.opendatajungle.commons.shared.util;
+package com.opendatajungle.commons.util;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

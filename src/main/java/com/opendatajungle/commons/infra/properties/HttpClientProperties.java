@@ -1,15 +1,27 @@
 package com.opendatajungle.commons.infra.properties;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@Getter
-@Setter
 @Component
 @ConfigurationProperties(prefix = "http.client")
 public class HttpClientProperties {
     private int connectTimeoutSeconds;
     private int readTimeoutSeconds;
+
+    public int getConnectTimeoutSeconds() {
+        return connectTimeoutSeconds;
+    }
+
+    public void setConnectTimeoutSeconds(int connectTimeoutSeconds) {
+        this.connectTimeoutSeconds = connectTimeoutSeconds;
+    }
+
+    public int getReadTimeoutSeconds() {
+        return readTimeoutSeconds;
+    }
+
+    public void setReadTimeoutSeconds(int readTimeoutSeconds) {
+        this.readTimeoutSeconds = readTimeoutSeconds;
+    }
 }

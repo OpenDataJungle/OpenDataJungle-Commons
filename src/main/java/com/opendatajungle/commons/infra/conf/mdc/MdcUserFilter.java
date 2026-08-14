@@ -1,6 +1,6 @@
 package com.opendatajungle.commons.infra.conf.mdc;
 
-import com.opendatajungle.commons.shared.util.UserUtils;
+import com.opendatajungle.commons.util.UserUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

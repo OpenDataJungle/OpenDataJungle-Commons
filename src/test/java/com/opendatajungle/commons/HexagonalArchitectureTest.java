@@ -174,13 +174,13 @@ class HexagonalArchitectureTest {
     }
 
     @Test
-    @DisplayName("Shared package can be used by all layers")
-    void sharedPackageCanBeUsedByAllLayers() {
+    @DisplayName("Util package can be used by all layers")
+    void utilPackageCanBeUsedByAllLayers() {
         ArchRule rule = classes()
-                .that().resideInAPackage("..shared..")
+                .that().resideInAPackage("..util..")
                 .should().onlyDependOnClassesThat()
-                .resideInAnyPackage("..shared..", "java..", "org.springframework..", "jakarta..", "org.apache..", "com.fasterxml..")
-                .because("Shared package should only contain utilities without business logic");
+                .resideInAnyPackage("..util..", "java..", "org.springframework..", "jakarta..", "org.apache..", "com.fasterxml..")
+                .because("Util package should only contain utilities without business logic");
 
         rule.check(importedClasses);
     }
