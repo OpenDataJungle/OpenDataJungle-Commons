@@ -21,7 +21,7 @@ Shared Spring Boot building blocks for OpenDataJungle projects.
 ```xml
 <dependency>
     <groupId>com.opendatajungle</groupId>
-    <artifactId>commons</artifactId>
+    <artifactId>opendatajungle-commons</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 </dependency>
 ```
