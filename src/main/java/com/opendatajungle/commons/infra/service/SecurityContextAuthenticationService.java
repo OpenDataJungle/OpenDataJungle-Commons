@@ -22,11 +22,7 @@ public class SecurityContextAuthenticationService implements AuthenticationUseCa
 
     @Override
     public Optional<String> findCurrentUser() {
-        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                .filter(Authentication::isAuthenticated)
-                .map(Authentication::getPrincipal)
-                .filter(Jwt.class::isInstance)
-                .map(Jwt.class::cast)
+        return getCurrentJwt()
                 .map(this::extractUsername)
                 .filter(Objects::nonNull)
                 .filter(username -> !username.isBlank());
@@ -40,6 +36,23 @@ public class SecurityContextAuthenticationService implements AuthenticationUseCa
         String preferredUsername = jwt.getClaimAsString("preferred_username");
         return preferredUsername != null && !preferredUsername.isBlank() ? preferredUsername : jwt.getSubject();
     }
+
+    @Override
+    public Optional<String> findCurrentUserFirstName() {
+        return getCurrentJwt()
+                .map(jwt -> jwt.getClaimAsString("given_name"))
+                .filter(Objects::nonNull)
+                .filter(name -> !name.isBlank());
+    }
+
+    @Override
+    public Optional<String> findCurrentUserLastName() {
+        return getCurrentJwt()
+                .map(jwt -> jwt.getClaimAsString("family_name"))
+                .filter(Objects::nonNull)
+                .filter(name -> !name.isBlank());
+    }
+
 
     @Override
     public List<String> getAuthorities() {
@@ -59,6 +72,14 @@ public class SecurityContextAuthenticationService implements AuthenticationUseCa
                 .filter(Jwt.class::isInstance)
                 .map(Jwt.class::cast)
                 .map(Jwt::getTokenValue);
+    }
+
+    private Optional<Jwt> getCurrentJwt() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getPrincipal)
+                .filter(Jwt.class::isInstance)
+                .map(Jwt.class::cast);
     }
 }
 

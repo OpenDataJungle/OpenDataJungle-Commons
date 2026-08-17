@@ -5,7 +5,9 @@ import com.opendatajungle.commons.business.exception.NotFoundException;
 import com.opendatajungle.commons.business.exception.ParamException;
 import com.opendatajungle.commons.client.dto.GeneralResponseException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -91,17 +94,29 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<GeneralResponseException> handleConstraintViolationException(ConstraintViolationException ex, HttpServletRequest request) {
-        String message = ex.getConstraintViolations().isEmpty() ? ex.getMessage()
-                : ex.getConstraintViolations().iterator().next().getMessage();
-        logger.warn("ConstraintViolationException: path={}, message={}", request.getRequestURI(), message);
+        ConstraintViolation<?> violation = ex.getConstraintViolations().isEmpty() ? null
+                : ex.getConstraintViolations().iterator().next();
+        String message = violation == null ? ex.getMessage() : violation.getMessage();
+        String field = violation == null ? null : extractFieldName(violation.getPropertyPath());
+        logger.warn("ConstraintViolationException: path={}, field={}, message={}", request.getRequestURI(), field, message);
         GeneralResponseException response = new GeneralResponseException(
                 "VALIDATION_ERROR",
                 message,
                 buildPath(request),
-                null,
+                field,
                 null
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    private String extractFieldName(Path propertyPath) {
+        if (propertyPath == null) {
+            return null;
+        }
+        return StreamSupport.stream(propertyPath.spliterator(), false)
+                .reduce((_, second) -> second)
+                .map(Path.Node::getName)
+                .orElse(null);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

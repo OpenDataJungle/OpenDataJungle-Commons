@@ -10,6 +10,10 @@ public interface AuthenticationUseCase {
 
     Optional<String> findCurrentUser();
 
+    Optional<String> findCurrentUserFirstName();
+
+    Optional<String> findCurrentUserLastName();
+
     List<String> getAuthorities();
 
     Optional<String> getToken();

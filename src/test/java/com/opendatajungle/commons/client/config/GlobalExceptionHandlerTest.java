@@ -7,6 +7,7 @@ import com.opendatajungle.commons.client.dto.GeneralResponseException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -198,6 +199,48 @@ class GlobalExceptionHandlerTest {
 
         // Then
         assertThat(response.getBody().message()).isEqualTo("no violations detail");
+        assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
+    }
+
+    @Test
+    void handleConstraintViolationException_shouldExtractFieldName_whenPropertyPathIsValid() {
+        // Given
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        when(violation.getMessage()).thenReturn("must not be null");
+        Path.Node node = mock(Path.Node.class);
+        when(node.getName()).thenReturn("firstName");
+        Path propertyPath = mock(Path.class);
+        when(propertyPath.spliterator()).thenReturn(List.of(node).spliterator());
+        when(violation.getPropertyPath()).thenReturn(propertyPath);
+        ConstraintViolationException ex = new ConstraintViolationException(Set.of(violation));
+
+        // When
+        ResponseEntity<GeneralResponseException> response = handler.handleConstraintViolationException(ex, request);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().code()).isEqualTo("VALIDATION_ERROR");
+        assertThat(response.getBody().message()).isEqualTo("must not be null");
+        assertThat(response.getBody().field()).isEqualTo("firstName");
+        assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
+    }
+
+    @Test
+    void handleConstraintViolationException_shouldReturnNullField_whenPropertyPathIsNull() {
+        // Given
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        when(violation.getMessage()).thenReturn("constraint violated");
+        when(violation.getPropertyPath()).thenReturn(null);
+        ConstraintViolationException ex = new ConstraintViolationException(Set.of(violation));
+
+        // When
+        ResponseEntity<GeneralResponseException> response = handler.handleConstraintViolationException(ex, request);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().code()).isEqualTo("VALIDATION_ERROR");
+        assertThat(response.getBody().message()).isEqualTo("constraint violated");
+        assertThat(response.getBody().field()).isNull();
         assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
     }
 

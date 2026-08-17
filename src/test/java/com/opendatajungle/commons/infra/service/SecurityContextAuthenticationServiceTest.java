@@ -141,6 +141,74 @@ class SecurityContextAuthenticationServiceTest {
         assertThat(token).isEmpty();
     }
 
+    @Test
+    void findCurrentUserFirstName_shouldReturnFirstName_whenPrincipalIsAJwt() {
+        // Given
+        when(jwt.getClaimAsString("given_name")).thenReturn("Alice");
+        authenticateWith(jwt);
+
+        // When
+        Optional<String> firstName = service.findCurrentUserFirstName();
+
+        // Then
+        assertThat(firstName).contains("Alice");
+    }
+
+    @Test
+    void findCurrentUserFirstName_shouldBeEmpty_whenNoAuthentication() {
+        // When
+        Optional<String> firstName = service.findCurrentUserFirstName();
+
+        // Then
+        assertThat(firstName).isEmpty();
+    }
+
+    @Test
+    void findCurrentUserFirstName_shouldBeEmpty_whenPrincipalIsNotAJwt() {
+        // Given
+        SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("alice", "creds"));
+
+        // When
+        Optional<String> firstName = service.findCurrentUserFirstName();
+
+        // Then
+        assertThat(firstName).isEmpty();
+    }
+
+    @Test
+    void findCurrentUserLastName_shouldReturnLastName_whenPrincipalIsAJwt() {
+        // Given
+        when(jwt.getClaimAsString("family_name")).thenReturn("Smith");
+        authenticateWith(jwt);
+
+        // When
+        Optional<String> lastName = service.findCurrentUserLastName();
+
+        // Then
+        assertThat(lastName).contains("Smith");
+    }
+
+    @Test
+    void findCurrentUserLastName_shouldBeEmpty_whenNoAuthentication() {
+        // When
+        Optional<String> lastName = service.findCurrentUserLastName();
+
+        // Then
+        assertThat(lastName).isEmpty();
+    }
+
+    @Test
+    void findCurrentUserLastName_shouldBeEmpty_whenPrincipalIsNotAJwt() {
+        // Given
+        SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("alice", "creds"));
+
+        // When
+        Optional<String> lastName = service.findCurrentUserLastName();
+
+        // Then
+        assertThat(lastName).isEmpty();
+    }
+
     private void authenticateWith(Jwt principal) {
         Authentication authentication = new TestingAuthenticationToken(principal, "creds");
         authentication.setAuthenticated(true);
