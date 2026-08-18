@@ -1,13 +1,12 @@
 package com.opendatajungle.commons.util;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 
 public class DateUtils {
     private DateUtils() {
     }
 
-    public static LocalDateTime now() {
-        return LocalDateTime.now(ZoneOffset.UTC);
+    public static Instant now() {
+        return Instant.now();
     }
 }

@@ -3,23 +3,22 @@ package com.opendatajungle.commons.util;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DateUtilsTest {
 
     @Test
-    void now_shouldReturnCurrentDateTime_inUtc() {
+    void now_shouldReturnCurrentTimestamp() {
         // Given
-        LocalDateTime before = LocalDateTime.now(ZoneOffset.UTC);
+        Instant before = Instant.now().minus(Duration.ofSeconds(1));
 
         // When
-        LocalDateTime result = DateUtils.now();
+        Instant result = DateUtils.now();
 
         // Then
-        LocalDateTime after = LocalDateTime.now(ZoneOffset.UTC);
-        assertThat(result).isBetween(before.minus(Duration.ofSeconds(100)), after.plus(Duration.ofSeconds(100)));
+        Instant after = Instant.now().plus(Duration.ofSeconds(1));
+        assertThat(result).isBetween(before, after);
     }
 }
