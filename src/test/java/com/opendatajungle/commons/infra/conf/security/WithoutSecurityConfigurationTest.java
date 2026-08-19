@@ -20,7 +20,7 @@ class WithoutSecurityConfigurationTest {
     @Test
     void permissiveCorsConfigurationSource_shouldAllowAnyOriginMethodAndHeader() {
         // When
-        CorsConfigurationSource source = configuration.permissiveCorsConfigurationSource();
+        CorsConfigurationSource source = configuration.corsConfigurationSource();
         CorsConfiguration corsConfiguration = source.getCorsConfiguration(new MockHttpServletRequest());
 
         // Then
@@ -38,7 +38,7 @@ class WithoutSecurityConfigurationTest {
         when(http.build()).thenReturn(builtChain);
 
         // When
-        SecurityFilterChain result = configuration.testSecurityFilterChain(http);
+        SecurityFilterChain result = configuration.testSecurityFilterChain(http, mock(CorsConfigurationSource.class));
 
         // Then
         assertThat(result).isSameAs(builtChain);

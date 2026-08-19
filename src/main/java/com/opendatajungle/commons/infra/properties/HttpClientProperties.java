@@ -1,9 +1,7 @@
 package com.opendatajungle.commons.infra.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "http.client")
 public class HttpClientProperties {
     private int connectTimeoutSeconds;

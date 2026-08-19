@@ -1,7 +1,9 @@
 package com.opendatajungle.commons.infra.conf.security;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,14 +15,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Configuration
+@AutoConfiguration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = false)
 @Profile({"test", "local"})
 public class WithoutSecurityConfiguration {
 
     @Bean
-    public CorsConfigurationSource permissiveCorsConfigurationSource() {
+    @ConditionalOnMissingBean(name = "corsConfigurationSource")
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOriginPattern("*");
         config.addAllowedMethod("*");
@@ -32,10 +35,12 @@ public class WithoutSecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) {
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http,
+                                                         @Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(permissiveCorsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .securityContext(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

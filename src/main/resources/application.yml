@@ -25,15 +25,15 @@ logging:
 management:
   info:
     ssl:
-      enabled: true
+      enabled: ${MANAGEMENT_INFO_SSL_ENABLED:true}
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:health,info,metrics,prometheus}
   health:
     db:
-      enabled: true
+      enabled: ${MANAGEMENT_HEALTH_DB_ENABLED:true}
   otlp:
     metrics:
       export:
-        enabled: false
+        enabled: ${MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED:false}

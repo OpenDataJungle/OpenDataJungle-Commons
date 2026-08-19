@@ -1,0 +1,4 @@
+com.opendatajungle.commons.infra.conf.WebConfiguration
+com.opendatajungle.commons.infra.conf.CommonsAutoConfiguration
+com.opendatajungle.commons.infra.conf.security.SecurityConfiguration
+com.opendatajungle.commons.infra.conf.security.WithoutSecurityConfiguration

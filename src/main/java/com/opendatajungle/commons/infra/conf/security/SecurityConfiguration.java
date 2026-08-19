@@ -2,9 +2,10 @@ package com.opendatajungle.commons.infra.conf.security;
 
 import com.opendatajungle.commons.infra.conf.mdc.MdcUserFilter;
 import com.opendatajungle.commons.infra.properties.CorsProperties;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,25 +20,30 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Configuration
+@AutoConfiguration
 @EnableWebSecurity
 @EnableMethodSecurity
 @Profile("!test & !local")
 public class SecurityConfiguration {
-    private final SecurityExceptionHandler securityExceptionHandler;
     private final CorsProperties corsProperties;
 
-    public SecurityConfiguration(SecurityExceptionHandler securityExceptionHandler, CorsProperties corsProperties) {
-        this.securityExceptionHandler = securityExceptionHandler;
+    public SecurityConfiguration(CorsProperties corsProperties) {
         this.corsProperties = corsProperties;
     }
 
     @Bean
+    @ConditionalOnMissingBean(SecurityExceptionHandler.class)
+    public SecurityExceptionHandler securityExceptionHandler() {
+        return new SecurityExceptionHandler();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(SecurityFilterChain.class)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityExceptionHandler securityExceptionHandler,
+                                                   @Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource) {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -73,7 +79,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(CorsConfigurationSource.class)
+    @ConditionalOnMissingBean(name = "corsConfigurationSource")
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 

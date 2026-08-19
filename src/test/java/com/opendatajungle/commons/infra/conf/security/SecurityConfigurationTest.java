@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,9 +30,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SecurityConfigurationTest {
 
-    @Mock
-    private SecurityExceptionHandler securityExceptionHandler;
-
     private CorsProperties corsProperties;
     private SecurityConfiguration configuration;
 
@@ -47,7 +43,7 @@ class SecurityConfigurationTest {
         corsProperties.setAllowCredentials(true);
         corsProperties.setMaxAge(3600L);
 
-        configuration = new SecurityConfiguration(securityExceptionHandler, corsProperties);
+        configuration = new SecurityConfiguration(corsProperties);
     }
 
     @Test
@@ -92,7 +88,7 @@ class SecurityConfigurationTest {
         when(http.build()).thenReturn(builtChain);
 
         // When
-        SecurityFilterChain result = configuration.securityFilterChain(http);
+        SecurityFilterChain result = configuration.securityFilterChain(http, mock(SecurityExceptionHandler.class), mock(CorsConfigurationSource.class));
 
         // Then
         assertThat(result).isSameAs(builtChain);
