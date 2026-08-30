@@ -1,6 +1,7 @@
 package com.opendatajungle.commons.client.config;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.opendatajungle.commons.business.exception.AccessDeniedException;
 import com.opendatajungle.commons.business.exception.NotFoundException;
 import com.opendatajungle.commons.business.exception.ParamException;
 import com.opendatajungle.commons.client.dto.GeneralResponseException;
@@ -170,6 +171,19 @@ public class GlobalExceptionHandler {
         GeneralResponseException response = new GeneralResponseException(
                 "ACCESS_DENIED",
                 "You do not have permission to access this resource",
+                buildPath(request),
+                null,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<GeneralResponseException> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        logger.warn("AccessDeniedException: path={}, message={}", request.getRequestURI(), ex.getMessage());
+        GeneralResponseException response = new GeneralResponseException(
+                "ACCESS_DENIED",
+                ex.getMessage(),
                 buildPath(request),
                 null,
                 null

@@ -1,6 +1,7 @@
 package com.opendatajungle.commons.client.config;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.opendatajungle.commons.business.exception.AccessDeniedException;
 import com.opendatajungle.commons.business.exception.NotFoundException;
 import com.opendatajungle.commons.business.exception.ParamException;
 import com.opendatajungle.commons.client.dto.GeneralResponseException;
@@ -313,6 +314,21 @@ class GlobalExceptionHandlerTest {
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody().code()).isEqualTo("ACCESS_DENIED");
+        assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
+    }
+
+    @Test
+    void handleAccessDeniedException_shouldReturnForbidden() {
+        // Given
+        AccessDeniedException ex = new AccessDeniedException("you cannot access this resource");
+
+        // When
+        ResponseEntity<GeneralResponseException> response = handler.handleAccessDeniedException(ex, request);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody().code()).isEqualTo("ACCESS_DENIED");
+        assertThat(response.getBody().message()).isEqualTo(ex.getMessage());
         assertThat(response.getBody().path()).isEqualTo(REQUEST_PATH);
     }
 
