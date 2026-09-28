@@ -8,7 +8,11 @@ public interface AuthenticationUseCase {
 
     String getCurrentUser();
 
-    Optional<String> findCurrentUser();
+    Optional<String> findCurrentUserUsername();
+
+    Optional<String> findCurrentUserAuthId();
+
+    Optional<String> findCurrentUserAuthIss();
 
     Optional<String> findCurrentUserFirstName();
 

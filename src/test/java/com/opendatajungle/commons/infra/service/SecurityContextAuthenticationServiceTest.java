@@ -53,43 +53,82 @@ class SecurityContextAuthenticationServiceTest {
     }
 
     @Test
-    void findCurrentUser_shouldFallBackToSubjectClaim_whenPreferredUsernameIsBlank() {
+    void findCurrentUserUsername_shouldFallBackToSubjectClaim_whenPreferredUsernameIsBlank() {
         // Given
         when(jwt.getClaimAsString("preferred_username")).thenReturn(" ");
         when(jwt.getSubject()).thenReturn("jwt-subject");
         authenticateWith(jwt);
 
         // When
-        Optional<String> currentUser = service.findCurrentUser();
+        Optional<String> currentUser = service.findCurrentUserUsername();
 
         // Then
         assertThat(currentUser).contains("jwt-subject");
     }
 
     @Test
-    void findCurrentUser_shouldBeEmpty_whenUserIsNotAuthenticated() {
+    void findCurrentUserUsername_shouldBeEmpty_whenUserIsNotAuthenticated() {
         // Given
         Authentication unauthenticated = new TestingAuthenticationToken("alice", "creds");
         unauthenticated.setAuthenticated(false);
         SecurityContextHolder.getContext().setAuthentication(unauthenticated);
 
         // When
-        Optional<String> currentUser = service.findCurrentUser();
+        Optional<String> currentUser = service.findCurrentUserUsername();
 
         // Then
         assertThat(currentUser).isEmpty();
     }
 
     @Test
-    void findCurrentUser_shouldBeEmpty_whenPrincipalIsNotAJwt() {
+    void findCurrentUserUsername_shouldBeEmpty_whenPrincipalIsNotAJwt() {
         // Given
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("alice", "creds"));
 
         // When
-        Optional<String> currentUser = service.findCurrentUser();
+        Optional<String> currentUser = service.findCurrentUserUsername();
 
         // Then
         assertThat(currentUser).isEmpty();
+    }
+
+    @Test
+    void findCurrentUserAuthId_shouldReturnSubjectClaim_whenPresent() {
+        // Given
+        when(jwt.getSubject()).thenReturn("jwt-subject");
+        authenticateWith(jwt);
+
+        // When
+        Optional<String> authId = service.findCurrentUserAuthId();
+
+        // Then
+        assertThat(authId).contains("jwt-subject");
+    }
+
+    @Test
+    void findCurrentUserAuthId_shouldBeEmpty_whenSubjectIsBlank() {
+        // Given
+        when(jwt.getSubject()).thenReturn(" ");
+        authenticateWith(jwt);
+
+        // When
+        Optional<String> authId = service.findCurrentUserAuthId();
+
+        // Then
+        assertThat(authId).isEmpty();
+    }
+
+    @Test
+    void findCurrentUserAuthIss_shouldReturnIssuerClaimAsString_whenNotAValidUrl() {
+        // Given
+        when(jwt.getClaimAsString("iss")).thenReturn("not a url");
+        authenticateWith(jwt);
+
+        // When
+        Optional<String> authIss = service.findCurrentUserAuthIss();
+
+        // Then
+        assertThat(authIss).contains("not a url");
     }
 
     @Test

@@ -5,24 +5,23 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class SecurityContextAuthenticationService implements AuthenticationUseCase {
 
     @Override
     public String getCurrentUser() {
-        return findCurrentUser().orElse(DEFAULT_UNKNOWN_USERNAME);
+        return findCurrentUserUsername().orElse(DEFAULT_UNKNOWN_USERNAME);
     }
 
     @Override
-    public Optional<String> findCurrentUser() {
+    public Optional<String> findCurrentUserUsername() {
         return getCurrentJwt()
                 .map(this::extractUsername)
-                .filter(Objects::nonNull)
                 .filter(username -> !username.isBlank());
     }
 
@@ -36,10 +35,23 @@ public class SecurityContextAuthenticationService implements AuthenticationUseCa
     }
 
     @Override
+    public Optional<String> findCurrentUserAuthId() {
+        return getCurrentJwt()
+                .map(Jwt::getSubject)
+                .filter(value -> !value.isBlank());
+    }
+
+    @Override
+    public Optional<String> findCurrentUserAuthIss() {
+        return getCurrentJwt()
+                .map(jwt -> jwt.getClaimAsString(JwtClaimNames.ISS))
+                .filter(value -> !value.isBlank());
+    }
+
+    @Override
     public Optional<String> findCurrentUserFirstName() {
         return getCurrentJwt()
                 .map(jwt -> jwt.getClaimAsString("given_name"))
-                .filter(Objects::nonNull)
                 .filter(name -> !name.isBlank());
     }
 
@@ -47,7 +59,6 @@ public class SecurityContextAuthenticationService implements AuthenticationUseCa
     public Optional<String> findCurrentUserLastName() {
         return getCurrentJwt()
                 .map(jwt -> jwt.getClaimAsString("family_name"))
-                .filter(Objects::nonNull)
                 .filter(name -> !name.isBlank());
     }
 
