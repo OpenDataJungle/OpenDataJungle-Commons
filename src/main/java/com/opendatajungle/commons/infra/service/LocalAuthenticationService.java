@@ -13,11 +13,11 @@ import java.util.Optional;
  */
 public class LocalAuthenticationService implements AuthenticationUseCase {
 
-    public static final String DEFAULT_USERNAME = "local-username";
-    public static final String DEFAULT_AUTH_ID = "local-auth-id";
-    public static final String DEFAULT_AUTH_ISS = "local-auth-iss";
-    public static final String DEFAULT_FIRST_NAME = "Local";
-    public static final String DEFAULT_LAST_NAME = "Local";
+    public static final String DEFAULT_USERNAME = "anonymous";
+    public static final String DEFAULT_AUTH_ID = "00000000-0000-0000-0000-000000000000";
+    public static final String DEFAULT_AUTH_ISS = "https://system.internal.localhost";
+    public static final String DEFAULT_FIRST_NAME = "Anonymous";
+    public static final String DEFAULT_LAST_NAME = "Anonymous";
 
     @Override
     public String getCurrentUser() {
